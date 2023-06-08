@@ -1,0 +1,54 @@
+
+name: build
+
+on:
+  # 手动触发事件
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'build'
+
+jobs:
+
+  v2rayN:
+    runs-on: windows-latest  
+    steps:
+      - name: Install dependencies
+        run: |
+          nuget restore .\v2rayN.sln
+          
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Install the .NET Core workload
+      - name: Install .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          vs-version: '[17.3,17.4)'
+
+      - name: Build project
+        run: |
+          msbuild v2rayN.sln /p:Configuration=Release /p:Platform="Any CPU"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: v2rayN.zip
+          path: bin/x86-Release/*.*
+
+
+
+
+
