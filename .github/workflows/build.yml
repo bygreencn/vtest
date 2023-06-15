@@ -1,6 +1,9 @@
 name: build
 
 on:
+  push:
+    branches:
+      - master
   # 手动触发事件
   workflow_dispatch:
     inputs:
@@ -13,9 +16,15 @@ on:
 
 jobs:
 
-  v2rayN:
+  v2rayN:    
     runs-on: windows-latest  
-    steps:      
+    steps:  
+      - uses: bhowell2/github-substring-action@1.0.2
+        id: short_sha
+        with:
+          value: ${{ github.sha}}
+          length_from_start: 8
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -43,5 +52,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: v2rayN.zip
-          path: v2rayN/v2rayN/bin/Release/*.*
+          name: v2rayN-${{ steps.short_sha.outputs.substring }}
+          path: v2rayN/v2rayN/bin/Release/net6.0-windows/*.*
